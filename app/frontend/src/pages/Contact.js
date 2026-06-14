@@ -40,20 +40,20 @@ export const Contact = () => {
             </div>
           ) : (
 <form onSubmit={handleSubmit} className="flex flex-col gap-6 relative z-10">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="flex flex-col gap-2">
-                   <label className="text-sm font-medium text-white">Full Name</label>
-                   <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="John Doe" />
-                 </div>
-                 <div className="flex flex-col gap-2">
-                   <label className="text-sm font-medium text-white">Email Address</label>
-                   <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="john@company.com" />
-                 </div>
-               </div>
-               <div className="flex flex-col gap-2">
-                 <label className="text-sm font-medium text-white">Message</label>
-                 <textarea required rows={5} value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors resize-none" placeholder="Tell us about what you're building..."></textarea>
-               </div>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-white" htmlFor="contact-name">Full Name</label>
+                  <input required type="text" id="contact-name" name="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="John Doe" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-white" htmlFor="contact-email">Email Address</label>
+                  <input required type="email" id="contact-email" name="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="john@company.com" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-white" htmlFor="contact-message">Message</label>
+                <textarea required id="contact-message" name="message" rows={5} value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--brand-primary)] transition-colors resize-none" placeholder="Tell us about what you're building..."></textarea>
+              </div>
                {status === "error" && (
                  <div>
                    <p className="text-red-400 text-sm">Failed to send message. Please try again.</p>
