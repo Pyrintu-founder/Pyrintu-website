@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
 import uuid
 from datetime import datetime, timezone
-import aiohttp
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -60,28 +59,8 @@ class ContactCreate(BaseModel):
     message: str = Field(min_length=5, max_length=4000)
 
 
-async def send_email(to: str, subject: str, html: str):
-    """Send email via Resend API"""
-    api_key = os.environ.get("RESEND_API_KEY")
-    if not api_key:
-        logger.warning("RESEND_API_KEY not set, skipping email")
-        return
-    
-    async with aiohttp.ClientSession() as session:
-        await session.post(
-            "https://api.resend.com/v1/emails",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "from": "onboarding@resend.dev",
-                "to": [to],
-                "subject": subject,
-                "html": html,
-            }
-        )
-
-
 @api_router.get("/")
-async def root():
+def root():
     return {
         "name": "Pyrintu API",
         "status": "live",
@@ -117,7 +96,7 @@ def waitlist_count():
 
 
 @api_router.post("/contact", response_model=ContactMessage)
-async def submit_contact(payload: ContactCreate):
+def submit_contact(payload: ContactCreate):
     if not db:
         raise HTTPException(status_code=500, detail="Database not configured")
     
@@ -126,22 +105,11 @@ async def submit_contact(payload: ContactCreate):
     doc["created_at"] = doc["created_at"].isoformat()
     db.contact_messages.insert_one(doc)
     
-    # Send notification email
-    html = f"""
-    <h2>New Contact Message</h2>
-    <p><strong>From:</strong> {payload.name} ({payload.email})</p>
-    <p><strong>Message:</strong> {payload.message}</p>
-    """
-    await send_email(
-        to="hello@pyrintu.software",
-        subject=f"New message from {payload.name}",
-        html=html
-    )
     return msg
 
 
 @api_router.get("/insights")
-async def list_insights():
+def list_insights():
     return {
         "posts": [
             {
@@ -192,6 +160,6 @@ app.add_middleware(
 
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
+def shutdown_db_client():
     if client:
         client.close()
