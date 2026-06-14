@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
 import uuid
 from datetime import datetime, timezone
+import aiohttp
 
 
 ROOT_DIR = Path(__file__).parent
@@ -88,6 +89,18 @@ async def submit_contact(payload: ContactCreate):
     doc = msg.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
     await db.contact_messages.insert_one(doc)
+    
+    # Send notification email
+    html = f"""
+    <h2>New Contact Message</h2>
+    <p><strong>From:</strong> {payload.name} ({payload.email})</p>
+    <p><strong>Message:</strong> {payload.message}</p>
+    """
+    await send_email(
+        to="hello@pyrintu.software",
+        subject=f"New message from {payload.name}",
+        html=html
+    )
     return msg
 
 
@@ -143,6 +156,25 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+async def send_email(to: str, subject: str, html: str):
+    """Send email via Resend API"""
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        logger.warning("RESEND_API_KEY not set, skipping email")
+        return
+    
+    async with aiohttp.ClientSession() as session:
+        await session.post(
+            "https://api.resend.com/v1/emails",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "from": "onboarding@resend.dev",
+                "to": [to],
+                "subject": subject,
+                "html": html,
+            }
+        )
 
 
 @app.on_event("shutdown")
