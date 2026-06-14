@@ -19,6 +19,9 @@ mongo_url = os.environ["MONGO_URL"]
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ["DB_NAME"]]
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Pyrintu API")
 api_router = APIRouter(prefix="/api")
 
@@ -51,6 +54,26 @@ class ContactCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     message: str = Field(min_length=5, max_length=4000)
+
+
+async def send_email(to: str, subject: str, html: str):
+    """Send email via Resend API"""
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        logger.warning("RESEND_API_KEY not set, skipping email")
+        return
+    
+    async with aiohttp.ClientSession() as session:
+        await session.post(
+            "https://api.resend.com/v1/emails",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "from": "onboarding@resend.dev",
+                "to": [to],
+                "subject": subject,
+                "html": html,
+            }
+        )
 
 
 @api_router.get("/")
@@ -153,28 +176,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
-
-async def send_email(to: str, subject: str, html: str):
-    """Send email via Resend API"""
-    api_key = os.environ.get("RESEND_API_KEY")
-    if not api_key:
-        logger.warning("RESEND_API_KEY not set, skipping email")
-        return
-    
-    async with aiohttp.ClientSession() as session:
-        await session.post(
-            "https://api.resend.com/v1/emails",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "from": "onboarding@resend.dev",
-                "to": [to],
-                "subject": subject,
-                "html": html,
-            }
-        )
 
 
 @app.on_event("shutdown")
