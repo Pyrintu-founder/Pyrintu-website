@@ -74,6 +74,15 @@ def root():
     }
 
 
+@app.get("/")
+def main_root():
+    return {
+        "name": "Pyrintu API",
+        "status": "live",
+        "tagline": "Intelligent Solutions. Real Impact.",
+    }
+
+
 @api_router.post("/waitlist", response_model=WaitlistEntry)
 def join_waitlist(payload: WaitlistCreate):
     if not db:
