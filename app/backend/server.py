@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 import os
 import logging
 from pathlib import Path
@@ -11,16 +11,20 @@ import uuid
 from datetime import datetime, timezone
 import aiohttp
 
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
-mongo_url = os.environ["MONGO_URL"]
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ["DB_NAME"]]
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+mongo_url = os.environ.get("MONGO_URL", "")
+if mongo_url:
+    client = MongoClient(mongo_url)
+    db = client[os.environ.get("DB_NAME", "pyrintu")]
+else:
+    client = None
+    db = None
+    logger.warning("MONGO_URL not set, database disabled")
 
 app = FastAPI(title="Pyrintu API")
 api_router = APIRouter(prefix="/api")
@@ -87,31 +91,40 @@ async def root():
 
 @api_router.post("/waitlist", response_model=WaitlistEntry)
 async def join_waitlist(payload: WaitlistCreate):
-    existing = await db.waitlist.find_one({"email": payload.email, "product": payload.product})
+    if not db:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    
+    existing = db.waitlist.find_one({"email": payload.email, "product": payload.product})
     if existing:
         raise HTTPException(status_code=409, detail="You're already on this waitlist. We'll be in touch soon.")
-
+    
     entry = WaitlistEntry(**payload.model_dump())
     doc = entry.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
-    await db.waitlist.insert_one(doc)
+    db.waitlist.insert_one(doc)
     return entry
 
 
 @api_router.get("/waitlist/count")
 async def waitlist_count():
-    total = await db.waitlist.count_documents({})
-    task_anchor = await db.waitlist.count_documents({"product": "task-anchor"})
-    modelguard = await db.waitlist.count_documents({"product": "modelguard"})
+    if not db:
+        return {"total": 0, "task_anchor": 0, "modelguard": 0}
+    
+    total = db.waitlist.count_documents({})
+    task_anchor = db.waitlist.count_documents({"product": "task-anchor"})
+    modelguard = db.waitlist.count_documents({"product": "modelguard"})
     return {"total": total, "task_anchor": task_anchor, "modelguard": modelguard}
 
 
 @api_router.post("/contact", response_model=ContactMessage)
 async def submit_contact(payload: ContactCreate):
+    if not db:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    
     msg = ContactMessage(**payload.model_dump())
     doc = msg.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
-    await db.contact_messages.insert_one(doc)
+    db.contact_messages.insert_one(doc)
     
     # Send notification email
     html = f"""
@@ -180,4 +193,5 @@ app.add_middleware(
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client:
+        client.close()
