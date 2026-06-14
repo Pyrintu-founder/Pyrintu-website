@@ -47,8 +47,11 @@ export const Home = () => {
             Production-Ready<br />
             <span className="text-gradient">AI Infrastructure</span>
           </h1>
+          <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-4 animate-fade-up">
+            Founded by <a href="https://linkedin.com/in/johandhaneja" target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:underline">Johan D.</a>
+          </p>
           <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-10 animate-fade-up">
-            Deploy, scale, and monitor machine learning models with enterprise-grade infrastructure. No DevOps team required.
+            Based in Hyderabad, India. Building ML infrastructure for the next generation of intelligent products.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up">
             <Link to="/contact" className="btn-primary w-full sm:w-auto group">
