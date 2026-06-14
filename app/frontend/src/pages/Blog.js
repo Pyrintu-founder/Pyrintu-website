@@ -39,9 +39,9 @@ export const Blog = () => {
           {posts.map((post) => (
             <article key={post.id} className="glass p-8 rounded-2xl border border-[rgba(255,255,255,0.1)] hover:border-[rgba(16,185,129,0.4)] transition-colors group cursor-pointer flex flex-col h-full">
               <div className="flex items-center gap-4 mb-4 text-sm">
-                <span className={`text-xs font-medium px-3 py-1 rounded-full bg-[rgba(16,185,129,0.15)] text-[var(--brand-primary)]`}>
-                  {post.tag}
-                </span>
+<span className={`text-xs font-medium px-3 py-1 rounded-full bg-[rgba(99,102,241,0.15)] text-[var(--brand-primary)]`}>
+                   {post.tag}
+                 </span>
                 <span className="text-[var(--text-secondary)]">{post.date}</span>
                 <span className="text-[var(--text-secondary)]">• {post.read_time} read</span>
               </div>
