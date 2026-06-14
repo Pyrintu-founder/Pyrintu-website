@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timezone
 import os
 import logging
+import requests
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,6 +21,33 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def send_resend_email(to: str, subject: str, html: str):
+    """Send email via Resend API"""
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        logger.warning("RESEND_API_KEY not set, skipping email")
+        return
+    
+    try:
+        response = requests.post(
+            "https://api.resend.com/v1/emails",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "from": "onboarding@resend.dev",
+                "to": [to],
+                "subject": subject,
+                "html": html,
+            },
+            timeout=10
+        )
+        if response.ok:
+            logger.info(f"Email sent to {to}")
+        else:
+            logger.error(f"Email failed: {response.text}")
+    except Exception as e:
+        logger.error(f"Email error: {e}")
 
 
 class WaitlistCreate(BaseModel):
@@ -63,6 +91,19 @@ def waitlist_count():
 def submit_contact(payload: ContactCreate):
     logger.info(f"Contact form: {payload.name} - {payload.email}")
     logger.info(f"Message: {payload.message}")
+    
+    # Send notification email
+    html = f"""
+    <h2>New Contact Message</h2>
+    <p><strong>From:</strong> {payload.name} ({payload.email})</p>
+    <p><strong>Message:</strong><br/>{payload.message}</p>
+    """
+    send_resend_email(
+        to="hello@pyrintu.software",
+        subject=f"New message from {payload.name}",
+        html=html
+    )
+    
     return {
         "id": str(uuid.uuid4()),
         "name": payload.name,
