@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import { Logo } from "./Logo";
 
 export const Footer = () => {
   return (
     <footer className="border-t border-[rgba(255,255,255,0.08)] bg-[var(--bg-secondary)] pt-16 pb-8 px-6 mt-auto">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         <div className="col-span-1 md:col-span-2 flex flex-col items-start gap-6">
-          <Logo size={32} />
+          <img src="/logo-horizontal.jpg" alt="Pyrintu Logo" className="h-8 object-contain rounded" />
           <p className="text-[var(--text-secondary)] text-sm max-w-sm">
             We build production-grade AI/ML products that solve real problems. Scale your infrastructure and deploy with confidence.
           </p>
@@ -50,7 +49,10 @@ export const Footer = () => {
       </div>
       
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[rgba(255,255,255,0.08)]">
-        <p className="text-[var(--text-secondary)] text-sm">© {new Date().getFullYear()} Pyrintu Inc. All rights reserved.</p>
+        <div className="flex items-center gap-3">
+          <img src="/logo-square.png" alt="Pyrintu Mark" className="w-8 h-8 object-contain rounded" />
+          <p className="text-[var(--text-secondary)] text-sm">© {new Date().getFullYear()} Pyrintu Inc. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );

@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import { Logo } from "./Logo";
 
 export const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full z-50 glass border-b border-[rgba(255,255,255,0.08)]">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <Logo size={32} />
+          <img src="/logo-horizontal.jpg" alt="Pyrintu Logo" className="h-8 object-contain rounded" />
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--text-secondary)]">
           <Link to="/products" className="hover:text-[var(--brand-primary)] transition-colors">Products</Link>
