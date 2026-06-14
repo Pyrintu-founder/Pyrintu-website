@@ -90,7 +90,7 @@ async def root():
 
 
 @api_router.post("/waitlist", response_model=WaitlistEntry)
-async def join_waitlist(payload: WaitlistCreate):
+def join_waitlist(payload: WaitlistCreate):
     if not db:
         raise HTTPException(status_code=500, detail="Database not configured")
     
@@ -106,7 +106,7 @@ async def join_waitlist(payload: WaitlistCreate):
 
 
 @api_router.get("/waitlist/count")
-async def waitlist_count():
+def waitlist_count():
     if not db:
         return {"total": 0, "task_anchor": 0, "modelguard": 0}
     
