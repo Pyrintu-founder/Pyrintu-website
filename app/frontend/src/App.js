@@ -19,7 +19,7 @@ import { Legal } from "@/pages/Legal";
 import NotFound from "@/pages/NotFound.jsx";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.replace(//$/, '') || ''; const API = ${BACKEND_URL}/api;
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
